@@ -1,4 +1,10 @@
 # --------------------------
+# Project Ignores
+# --------------------------
+# Used when testing the download script
+dotenv/
+
+# --------------------------
 # MATLAB-Specific Ignores
 # --------------------------
 
