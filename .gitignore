@@ -1,0 +1,66 @@
+# --------------------------
+# MATLAB-Specific Ignores
+# --------------------------
+
+# Auto-save files
+*.asv
+*.m~
+
+# Compiled MEX files (platform-specific binaries)
+*.mex*
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+
+# Simulink generated files (if ever used)
+slprj/
+sfunctmpl.c
+*.tlc
+*.rtw
+*.mk
+*_grt_rtw/
+*_ert_rtw/
+*.rpt
+
+# Workspace and history files
+*.mat
+*.fig
+*.mdl
+*.slx
+*.autosave
+*.bak
+*.log
+
+# Unit test artifacts
+test-output/
+*.junit.xml
+
+# --------------------------
+# Common OS Ignores
+# --------------------------
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# --------------------------
+# Git-related
+# --------------------------
+
+# If using GitHub Desktop
+*.orig
+*.rej
+
+# Ignore personal config
+.env
+*.env
+.env.*
