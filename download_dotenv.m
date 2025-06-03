@@ -11,7 +11,7 @@ files = ["dotenv.m", "readme.md"];
 targetDir = fullfile(pwd, targetFolder);
 gitHubURL = "https://raw.githubusercontent.com/DevonLantagne/matlab-dotenv/main/";
 
-fprintf('Saving dotenv to %s\n', targetDir);
+fprintf("Saving dotenv to %s\nDon't forget to add this folder to the MATLAB path!\n", targetDir);
 
 % Create directory if it doesn't exist
 if ~exist(targetDir, 'dir')
@@ -24,7 +24,7 @@ for file = files
     localFile = fullfile(targetDir, file);
     remoteURL = gitHubURL + file;
 
-    fprintf('Downloading %s from:\n  %s\n', file, remoteURL);
+    fprintf('Downloading %s from: %s\n', file, remoteURL);
 
     try
         websave(localFile, remoteURL);
@@ -33,3 +33,5 @@ for file = files
         warning('  ✘ Failed to download %s: %s\n', localFile, ME.message);
     end
 end
+
+fprintf("File download complete!\n\n");
