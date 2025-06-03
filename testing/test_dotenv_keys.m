@@ -16,6 +16,7 @@ classdef test_dotenv_keys < DotenvTestBase
         % If resultType is "empty", then expect no key=value pair but a good parse
 
         function testSimpleAssignment(testCase)
+            % Simple unquoted assignment
             line = "MY_VAR=1234";
             expectedResults = {
                 "python", "value", "MY_VAR", "1234";
@@ -27,6 +28,7 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testColonAssignment(testCase)
+            % Tests the unique python mode for detecting : separator
             line = "MY_VAR: 1234";
             expectedResults = {
                 "python", "value", "MY_VAR", "1234";
@@ -38,6 +40,8 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testInvalidKeyNumber(testCase)
+            % Python and bash keys should not start with numbers, but in
+            % raw mode will use MATLAB's variable name correction
             line = "1INVALID=foo";
             args = {"FixKeysPrefix", "x"};
             expectedResults = {
@@ -50,6 +54,8 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testBashExport(testCase)
+            % Tests interpreting the bash "export" directive. Parser
+            % removes the directive unless in raw mode.
             % Assuming FixKey is not "none", space is deleted regardless of FixKey
             line = "export MY_VAR=5";
             optArgs = {"FixKeys", "underscore"};
@@ -63,6 +69,7 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testMissingSeparator(testCase)
+            % Parsor errors if no equal sign (and : if python)
             line = "MY_VAR 1234";
             expectedResults = {
                 "python", "error", "dotenv:python:InvalidSeparator", [];
@@ -74,6 +81,8 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testKeyWithHyphen(testCase)
+            % Hyphens are not permitted, but in raw mode will use MATLAB's
+            % variable name correction.
             line = "MY-VAR=hello";
             optArgs = {"FixKeys", "underscore"};
             expectedResults = {
@@ -86,6 +95,7 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testMultipleEquals(testCase)
+            % Only the first equal sign is used (same for :)
             line = "MY_VAR=value=more";
             expectedResults = {
                 "python", "value", "MY_VAR", "value=more";
@@ -97,6 +107,8 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testSeparatorWhitespaceNoQuotes(testCase)
+            % Python is forgiving with whitespace, bash is not, raw is
+            % literal.
             line = "MY_VAR    =    spaced";
             expectedResults = {
                 "python", "value", "MY_VAR", "spaced";
@@ -108,7 +120,8 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testDoubleQuotedKey(testCase)
-            % Bash does not allow quoted keys
+            % Parser does not want quoted keys but will strip them if in
+            % raw mode.
             line = """MY_VAR""=1234";
             expectedResults = {
                 "python", "error", "dotenv:python:KeySyntax", [];
@@ -120,7 +133,8 @@ classdef test_dotenv_keys < DotenvTestBase
 
 
         function testSingleQuotedKey(testCase)
-            % Bash does not allow quoted keys
+            % Parser does not want quoted keys but will strip them if in
+            % raw mode.
             line = "'MY_VAR'=1234";
             expectedResults = {
                 "python", "error", "dotenv:python:KeySyntax", [];
