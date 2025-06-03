@@ -15,6 +15,25 @@ classdef test_dotenv_quotes < DotenvTestBase
         %   expectedKey column. Ignore last column.
         % If resultType is "empty", then expect no key=value pair but a good parse
 
+        function testDoubleQuoted(testCase)
+            line = "MY_VAR=""hello""";
+            expectedResults = {
+                "python", "value", "MY_VAR", "hello";
+                "bash",   "value", "MY_VAR", "hello";
+                "raw",    "value", "MY_VAR", """hello""";
+                };
+            testCase.verifyLine(line, expectedResults)
+        end
+        function testSingleQuoted(testCase)
+            line = "MY_VAR='hello'";
+            expectedResults = {
+                "python", "value", "MY_VAR", "hello";
+                "bash",   "value", "MY_VAR", "hello";
+                "raw",    "value", "MY_VAR", "'hello'";
+                };
+            testCase.verifyLine(line, expectedResults)
+        end
+
         function testDoubleQuotedWithSpaces(testCase)
             line = "MY_VAR=""hello world""";
             expectedResults = {
@@ -24,8 +43,6 @@ classdef test_dotenv_quotes < DotenvTestBase
                 };
             testCase.verifyLine(line, expectedResults)
         end
-
-
         function testSingleQuotedWithSpaces(testCase)
             line = "MY_VAR='hello world'";
             expectedResults = {
@@ -37,6 +54,8 @@ classdef test_dotenv_quotes < DotenvTestBase
         end
 
 
+        % Tests the parser ignores # in quotes but not outside. Raw
+        % takes everything.
         function testHashInDoubleQuote(testCase)
             line = "PASSWORD=""MyPass3#Word"" # password comment";
             expectedResults = {
@@ -48,7 +67,7 @@ classdef test_dotenv_quotes < DotenvTestBase
         end
 
 
-        function testEscapedQuotesInsideDoubleQuotes(testCase)
+        function testEscapedDoubleQuotesInsideDoubleQuotes(testCase)
             line = "MY_VAR=""This is a \""quoted\"" word""";
             expectedResults = {
                 "python", "value", "MY_VAR", "This is a ""quoted"" word";
@@ -57,7 +76,37 @@ classdef test_dotenv_quotes < DotenvTestBase
                 };
             testCase.verifyLine(line, expectedResults)
         end
+        function testEscapedDoubleQuotesInsideSingleQuotes(testCase)
+            % Won't escape double quotes with literal single quotes
+            line = "MY_VAR='This is a \""quoted\"" word'";
+            expectedResults = {
+                "python", "value", "MY_VAR", "This is a \""quoted\"" word";
+                "bash",   "value", "MY_VAR", "This is a \""quoted\"" word";
+                "raw",    "value", "MY_VAR", "'This is a \""quoted\"" word'";
+                };
+            testCase.verifyLine(line, expectedResults)
+        end
 
+        function testEscapedSingleQuotesInsideDoubleQuotes(testCase)
+            line = "MY_VAR=""This is a \'quoted\' word""";
+            expectedResults = {
+                "python", "value", "MY_VAR", "This is a 'quoted' word";
+                "bash",   "value", "MY_VAR", "This is a 'quoted' word";
+                "raw",    "value", "MY_VAR", """This is a \'quoted\' word""";
+                };
+            testCase.verifyLine(line, expectedResults)
+        end
+        function testEscapedSingleQuotesInsideSingleQuotes(testCase)
+            % Python escapes single quotes and backslashes but bash takes
+            % everything literally. Nested single quotes in bash error.
+            line = "MY_VAR='This is a \'quoted\' word'";
+            expectedResults = {
+                "python", "value", "MY_VAR", "This is a 'quoted' word";
+                "bash",   "error", "dotenv:helper:OddQuotes", [];
+                "raw",    "value", "MY_VAR", "'This is a \'quoted\' word'";
+                };
+            testCase.verifyLine(line, expectedResults)
+        end
 
         function testUnterminatedDoubleQuote(testCase)
             line = "MY_VAR=""unclosed";
@@ -68,8 +117,6 @@ classdef test_dotenv_quotes < DotenvTestBase
                 };
             testCase.verifyLine(line, expectedResults)
         end
-
-
         function testUnterminatedSingleQuote(testCase)
             line = "MY_VAR='unclosed";
             expectedResults = {
@@ -90,8 +137,6 @@ classdef test_dotenv_quotes < DotenvTestBase
                 };
             testCase.verifyLine(line, expectedResults)
         end
-
-
         function testWindowsPathSingleQuotes(testCase)
             line = "MY_DIR='C:\\Users\\user\\Code Projects\\matlab-dotenv'";
             expectedResults = {
@@ -101,8 +146,6 @@ classdef test_dotenv_quotes < DotenvTestBase
                 };
             testCase.verifyLine(line, expectedResults)
         end
-
-
         function testWindowsPathNoQuotes(testCase)
             line = "MY_DIR=C:\Users\user\Code Projects\matlab-dotenv";
             expectedResults = {
@@ -123,8 +166,6 @@ classdef test_dotenv_quotes < DotenvTestBase
                 };
             testCase.verifyLine(line, expectedResults)
         end
-
-
         function testUnixPathSingleQuotes(testCase)
             line = "MY_DIR='/Users/user/Code Projects/matlab-dotenv'";
             expectedResults = {
@@ -134,8 +175,6 @@ classdef test_dotenv_quotes < DotenvTestBase
                 };
             testCase.verifyLine(line, expectedResults)
         end
-
-
         function testUnixPathNoQuotes(testCase)
             line = "MY_DIR=/Users/user/Code Projects/matlab-dotenv";
             expectedResults = {

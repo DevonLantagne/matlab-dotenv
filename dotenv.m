@@ -103,8 +103,13 @@ for filename = filenames
                     % Will trim whitespace on key
                     key = strtrim(extractBefore(ThisLine, "="));
                     if ismissing(key)
+                        % Throwing warnings for \U escape in sprintf ????
+                        % This needs a major fix since MATLAB is escaping
+                        % our test sequences, so we need to escape the
+                        % escapes.
+                        % TODO
                         error('dotenv:raw:NoSeparator', ...
-                            "%s: Line %d: %s\n%s", filename, LineNum, ThisLine, ...
+                            filename + ": Line " + LineNum + ": " + ThisLine + newline + ...
                             "Could not find '=' separator.");
                     end
                     % Be nice and strip quotes around the key (if any)
@@ -116,7 +121,8 @@ for filename = filenames
             end
         catch ME
             causeException = MException('dotenv:ParseError', ...
-                sprintf("%s: Line %d: %s", filename, LineNum, ThisLine));
+                filename + ": Line " + LineNum + ": " + ThisLine);
+                %sprintf("%s: Line %d: %s", filename, LineNum, ThisLine));
             ME = addCause(ME, causeException);
             rethrow(ME)
         end
